@@ -387,20 +387,23 @@
         }
 
         function startGame() {
-            document.getElementById('overlay').style.display = 'none';
-            isGameRunning = true;
-            speed = 600; 
-            throttle = 80;
-            
-            // 첫 적기 바로 소환 후 주기적 소환
-            setTimeout(spawnEnemyFighter, 1000);
-            setInterval(spawnEnemyFighter, 3000);
-        }
+    // 1. 오버레이 화면을 확실하게 숨김
+    const overlay = document.getElementById('overlay');
+    if (overlay) {
+        overlay.style.setProperty('display', 'none', 'important');
+        overlay.style.visibility = 'hidden'; // 추가적인 안전장치
+        overlay.style.opacity = '0';
+    }
 
-        function renderLoop() {
-            requestAnimationFrame(renderLoop);
-            const dt = Math.min(clock.getDelta(), 0.1);
-            const time = clock.getElapsedTime();
+    // 2. 게임 상태 활성화
+    isGameRunning = true;
+    
+    // 3. iframe 내에서 키보드 입력을 받기 위해 포커스를 강제로 가져옴
+    window.focus(); 
+
+    // 4. 애니메이션 루프 시작 (이미 실행 중이지 않은 경우에만)
+    // animate(); // 기존 코드에 따라 유지 또는 호출
+}
 
             if (isGameRunning) {
                 updatePhysics(dt, time);
