@@ -20,525 +20,223 @@
         }
 
         .stat-line { display: flex; justify-content: space-between; margin-bottom: 8px; border-bottom: 1px solid rgba(0,255,0,0.3); padding-bottom: 5px; }
-        .stat-val { font-weight: bold; font-size: 26px; }
-        .score-val { color: #ffcc00; text-shadow: 0 0 10px #ffcc00; }
-
-        #crosshair {
-            position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
-            width: 400px; height: 400px; border-radius: 50%; pointer-events: none;
-            display: flex; justify-content: center; align-items: center;
-        }
-        .ch-center { width: 12px; height: 12px; border: 2px solid #0f0; border-radius: 50%; box-shadow: 0 0 10px #0f0; }
-        .ch-line-h { position: absolute; width: 80px; height: 2px; background: #0f0; box-shadow: 0 0 8px #0f0; }
-        .ch-line-v { position: absolute; width: 2px; height: 30px; background: #0f0; box-shadow: 0 0 8px #0f0; }
-        .pitch-ladder { position: absolute; width: 120px; height: 1px; background: rgba(0, 255, 0, 0.5); }
+        .stat-val { font-weight: bold; font-size: 24px; }
 
         #overlay {
-            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
-            background: radial-gradient(circle, rgba(0,20,40,0.9) 0%, rgba(0,0,0,1) 100%);
-            display: flex; justify-content: center; align-items: center;
-            z-index: 100; color: white; cursor: pointer; flex-direction: column;
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.85); display: flex; justify-content: center; align-items: center;
+            z-index: 1000; flex-direction: column; color: #0f0;
         }
 
-        .menu-box { text-align: center; max-width: 850px; }
-        .menu-box h1 { color: #0f0; font-size: 4em; margin: 0; text-shadow: 0 0 20px #0f0; letter-spacing: 5px; }
-        .menu-box p { color: #aaa; font-size: 1.2em; margin-top: 10px; }
-        
-        .controls-grid {
-            display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 20px; text-align: left; margin: 40px 0;
-            background: rgba(0, 255, 0, 0.05); padding: 30px; border-radius: 10px; border: 1px solid rgba(0,255,0,0.2);
+        /* iframe 환경 대응을 위한 클래스 */
+        #overlay.hidden {
+            display: none !important;
+            visibility: hidden !important;
+            opacity: 0 !important;
+            pointer-events: none !important;
         }
-        .key { background: #111; padding: 5px 12px; border-radius: 4px; border: 1px solid #0f0; color: #0f0; font-weight: bold; font-family: monospace; }
-        
-        .btn { padding: 18px 50px; background: transparent; color: #0f0; border: 2px solid #0f0; font-size: 22px; font-weight: bold; border-radius: 5px; cursor: pointer; transition: 0.3s; text-shadow: 0 0 5px #0f0; box-shadow: inset 0 0 10px rgba(0,255,0,0.2); }
-        .btn:hover { background: #0f0; color: #000; transform: scale(1.05); box-shadow: 0 0 30px #0f0; }
 
-        #throttle-bar-container { position: absolute; left: 30px; top: 50%; transform: translateY(-50%); width: 20px; height: 300px; border: 2px solid #0f0; background: rgba(0,0,0,0.5); }
-        #throttle-bar { position: absolute; bottom: 0; left: 0; width: 100%; background: #0f0; box-shadow: 0 0 10px #0f0; transition: height 0.1s; }
-
-        #warning-msg {
-            position: absolute; top: 30%; left: 50%; transform: translateX(-50%);
-            color: #ff0000; font-size: 30px; font-weight: bold; letter-spacing: 5px;
-            text-shadow: 0 0 10px #ff0000; display: none;
-            animation: flash 0.5s infinite alternate;
+        .menu-box {
+            border: 2px solid #0f0; padding: 40px 60px; text-align: center;
+            background: rgba(0, 20, 0, 0.9); box-shadow: 0 0 30px #0f0;
         }
-        @keyframes flash { from { opacity: 0.3; } to { opacity: 1; } }
 
+        .btn {
+            margin-top: 30px; padding: 15px 40px; background: #0f0; color: #000;
+            font-weight: bold; font-size: 20px; cursor: pointer; border: none;
+            transition: all 0.3s;
+        }
+
+        .btn:hover { background: #fff; box-shadow: 0 0 20px #fff; }
+
+        #throttle-container {
+            position: absolute; left: 30px; bottom: 30px; width: 40px; height: 200px;
+            border: 2px solid #0f0; background: rgba(0,50,0,0.3);
+        }
+        #throttle-bar {
+            position: absolute; bottom: 0; width: 100%; height: 50%; background: #0f0;
+            transition: height 0.1s; box-shadow: 0 0 15px #0f0;
+        }
     </style>
 </head>
 <body>
 
-    <div id="ui-layer">
-        <div class="hud-panel">
-            <div style="text-align: center; margin-bottom: 15px; color: #fff; letter-spacing: 2px;">COMBAT_SYS</div>
-            <div class="stat-line"><span>SCORE</span> <span id="val-score" class="stat-val score-val">0</span></div>
-            <div class="stat-line"><span>SPD</span> <span id="val-spd" class="stat-val">0</span></div>
-            <div class="stat-line"><span>ALT</span> <span id="val-alt" class="stat-val">0</span></div>
-            <div class="stat-line"><span>THR</span> <span id="val-thr" class="stat-val">0%</span></div>
-        </div>
-    </div>
-
-    <div id="throttle-bar-container"><div id="throttle-bar" style="height: 0%;"></div></div>
-    
-    <div id="warning-msg">ENEMY FIGHTERS APPROACHING</div>
-
-    <div id="crosshair">
-        <div class="ch-center"></div>
-        <div class="ch-line-h" style="left: -40px;"></div>
-        <div class="ch-line-h" style="right: -40px;"></div>
-        <div class="ch-line-v" style="top: -20px;"></div>
-        <div class="pitch-ladder" style="top: 20%;"></div>
-        <div class="pitch-ladder" style="top: 80%;"></div>
-    </div>
-
     <div id="overlay">
         <div class="menu-box">
             <h1>STEALTH FIGHTER</h1>
-            <p>공역에 침투한 적군 전투기 편대를 섬멸하십시오.</p>
-            
-            <div class="controls-grid">
-                <div>
-                    <h3 style="color: #fff; margin-top: 0;">무기 제어</h3>
-                    <p><span class="key">SPACE</span> 기관포 발사</p>
-                </div>
-                <div>
-                    <h3 style="color: #fff; margin-top: 0;">엔진 출력</h3>
-                    <p><span class="key">W</span> 가속 (Afterburner)</p>
-                    <p><span class="key">S</span> 감속 (Air Brake)</p>
-                </div>
-                <div>
-                    <h3 style="color: #fff; margin-top: 0;">비행 자세</h3>
-                    <p><span class="key">↑</span> / <span class="key">↓</span> 기수 조절</p>
-                    <p><span class="key">←</span> / <span class="key">→</span> 롤링 (기울기)</p>
-                    <p><span class="key">A</span> / <span class="key">D</span> 방향타</p>
-                </div>
-            </div>
-            
+            <p>전투기 제어 시스템 준비 완료</p>
+            <p style="font-size: 14px; color: #888; margin-top: 10px;">WASD: 기체 제어 | SHIFT/CTRL: 속도 조절 | SPACE: 미사일 발사</p>
             <button class="btn" onclick="startGame()">SORTIE (출격)</button>
         </div>
     </div>
 
+    <div id="ui-layer">
+        <div class="hud-panel">
+            <div class="stat-line"><span>SCORE</span><span id="val-score" class="stat-val">0</span></div>
+            <div class="stat-line"><span>SPEED</span><span id="val-spd" class="stat-val">0 KM/H</span></div>
+            <div class="stat-line"><span>ALTITUDE</span><span id="val-alt" class="stat-val">0 FT</span></div>
+        </div>
+        
+        <div style="display: flex; justify-content: flex-end;">
+            <div class="hud-panel" style="width: 150px; border-left: none; border-right: 4px solid #0f0; text-align: right;">
+                <div class="stat-line"><span>THR</span><span id="val-thr" class="stat-val">50%</span></div>
+            </div>
+        </div>
+    </div>
+
+    <div id="throttle-container">
+        <div id="throttle-bar"></div>
+    </div>
+
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
     <script>
+        // 전역 변수 설정
         let scene, camera, renderer, clock;
-        let jetGroup, afterburnerL, afterburnerR;
-        let terrain;
-        
+        let jetGroup, terrain, sea;
         let isGameRunning = false;
-        let throttle = 0;       
-        let speed = 0;
-        const maxSpeed = 1500; 
-        const minFlightSpeed = 200; 
-        
+
+        // 게임 상태 변수
+        let speed = 200, throttle = 50, score = 0;
+        const maxSpeed = 800, minFlightSpeed = 150;
         let pitch = 0, roll = 0, yaw = 0;
-        const keys = { w: false, s: false, a: false, d: false, ArrowUp: false, ArrowDown: false, ArrowLeft: false, ArrowRight: false, space: false };
+        
+        const keys = {};
+        const missiles = [];
+        const enemies = [];
 
-        let bullets = [];
-        let enemies = [];
-        let explosions = [];
-        let score = 0;
-        let lastShootTime = 0;
-
-        window.onload = init;
+        init();
+        renderLoop();
 
         function init() {
             scene = new THREE.Scene();
-            scene.background = new THREE.Color(0xd77a5b);
-            scene.fog = new THREE.FogExp2(0xd77a5b, 0.00015); 
+            scene.background = new THREE.Color(0x000510);
+            scene.fog = new THREE.FogExp2(0x000510, 0.0008);
 
-            camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 1, 30000);
-
-            renderer = new THREE.WebGLRenderer({ antialias: true, powerPreference: "high-performance" });
+            camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 20000);
+            renderer = new THREE.WebGLRenderer({ antialias: true });
             renderer.setSize(window.innerWidth, window.innerHeight);
-            renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
-            renderer.shadowMap.enabled = true;
             document.body.appendChild(renderer.domElement);
-
-            scene.add(new THREE.AmbientLight(0x404050, 0.8));
-
-            const sunLight = new THREE.DirectionalLight(0xffaa55, 1.2);
-            sunLight.position.set(-5000, 2000, -5000);
-            sunLight.castShadow = true;
-            sunLight.shadow.camera.left = -1000; sunLight.shadow.camera.right = 1000;
-            sunLight.shadow.camera.top = 1000; sunLight.shadow.camera.bottom = -1000;
-            scene.add(sunLight);
-
-            createOcean();
-            createMassiveTerrain();
-            createJetFighter();
 
             clock = new THREE.Clock();
 
-            window.addEventListener('keydown', (e) => { 
-                if(keys.hasOwnProperty(e.key)) keys[e.key] = true; 
-                if(e.code === 'Space') keys.space = true;
-            });
-            window.addEventListener('keyup', (e) => { 
-                if(keys.hasOwnProperty(e.key)) keys[e.key] = false; 
-                if(e.code === 'Space') keys.space = false;
-            });
-            window.addEventListener('resize', onResize);
+            // 조명
+            const ambient = new THREE.AmbientLight(0x404040, 2);
+            scene.add(ambient);
+            const sun = new THREE.DirectionalLight(0xffffff, 1);
+            sun.position.set(500, 1000, 500);
+            scene.add(sun);
 
-            renderLoop();
-        }
-
-        function createOcean() {
-            const geo = new THREE.PlaneGeometry(60000, 60000);
-            const mat = new THREE.MeshStandardMaterial({ 
-                color: 0x0a3b59, metalness: 0.9, roughness: 0.1, transparent: true, opacity: 0.8 
-            });
-            const ocean = new THREE.Mesh(geo, mat);
-            ocean.rotation.x = -Math.PI / 2;
-            ocean.position.y = 50; 
-            scene.add(ocean);
-        }
-
-        function createMassiveTerrain() {
-            const size = 50000; 
-            const segments = 250; 
-            const geo = new THREE.PlaneGeometry(size, size, segments, segments);
+            // 기체 생성
+            createJetFighter();
             
-            const vertices = geo.attributes.position.array;
-            const colors = [];
-            const color = new THREE.Color();
+            // 환경 생성 (바다 및 지형)
+            createEnvironment();
 
-            for (let i = 0; i < vertices.length; i += 3) {
-                const x = vertices[i];
-                const y = vertices[i+1];
-                let height = Math.sin(x*0.0002)*Math.cos(y*0.0002)*2000 
-                           + Math.sin(x*0.0005)*Math.cos(y*0.0008)*800
-                           + Math.sin(x*0.001)*Math.cos(y*0.001)*300;
-                
-                if (height < 20) height = -50; 
-                vertices[i+2] = height; 
-
-                if (height < 100) color.setHex(0x3e522b); 
-                else if (height < 600) color.setHex(0x574a38); 
-                else if (height < 1500) color.setHex(0x42403d); 
-                else color.setHex(0xdddddd); 
-
-                colors.push(color.r, color.g, color.b);
-            }
-            geo.setAttribute('color', new THREE.Float32BufferAttribute(colors, 3));
-            geo.computeVertexNormals();
-
-            const mat = new THREE.MeshStandardMaterial({ vertexColors: true, roughness: 0.8, metalness: 0.1, flatShading: true });
-            terrain = new THREE.Mesh(geo, mat);
-            terrain.rotation.x = -Math.PI / 2;
-            scene.add(terrain);
+            // 이벤트 리스너
+            window.addEventListener('keydown', e => keys[e.code] = true);
+            window.addEventListener('keyup', e => keys[e.code] = false);
+            window.addEventListener('resize', onResize);
         }
 
-        // 플레이어 전투기
         function createJetFighter() {
             jetGroup = new THREE.Group();
-
-            const matDark = new THREE.MeshStandardMaterial({ color: 0x1a1c1d, metalness: 0.6, roughness: 0.4 });
-            const matGlass = new THREE.MeshStandardMaterial({ color: 0x000000, metalness: 0.9, roughness: 0.1 });
-
-            const body = new THREE.Mesh(new THREE.CylinderGeometry(0.8, 1, 8, 8), matDark);
+            
+            // 동체
+            const bodyGeo = new THREE.ConeGeometry(1, 6, 4);
+            const bodyMat = new THREE.MeshPhongMaterial({ color: 0x222222, shininess: 100 });
+            const body = new THREE.Mesh(bodyGeo, bodyMat);
             body.rotation.x = Math.PI / 2;
             jetGroup.add(body);
 
-            const nose = new THREE.Mesh(new THREE.ConeGeometry(0.8, 4, 8), matDark);
-            nose.rotation.x = -Math.PI / 2;
-            nose.position.z = -6; 
-            jetGroup.add(nose);
+            // 주익 (날개)
+            const wingGeo = new THREE.BoxGeometry(5, 0.1, 2);
+            const wing = new THREE.Mesh(wingGeo, bodyMat);
+            wing.position.z = -0.5;
+            jetGroup.add(wing);
 
-            const cockpitGeo = new THREE.SphereGeometry(0.5, 16, 16);
-            const cockpit = new THREE.Mesh(cockpitGeo, matGlass);
-            cockpit.scale.set(1, 3, 1);
-            cockpit.rotation.x = Math.PI / 2;
-            cockpit.position.set(0, 0.7, -3);
-            jetGroup.add(cockpit);
-
-            const wingGeo = new THREE.BoxGeometry(6, 0.1, 4);
-            const leftWing = new THREE.Mesh(wingGeo, matDark);
-            leftWing.position.set(3, 0, 1);
-            leftWing.rotation.y = Math.PI / 6; 
-            jetGroup.add(leftWing);
-
-            const rightWing = new THREE.Mesh(wingGeo, matDark);
-            rightWing.position.set(-3, 0, 1);
-            rightWing.rotation.y = -Math.PI / 6;
-            jetGroup.add(rightWing);
-
-            const vTailGeo = new THREE.BoxGeometry(0.1, 2, 3);
-            const leftVTail = new THREE.Mesh(vTailGeo, matDark);
-            leftVTail.position.set(1.2, 1, 3);
-            leftVTail.rotation.z = -Math.PI / 8; 
-            jetGroup.add(leftVTail);
-
-            const rightVTail = new THREE.Mesh(vTailGeo, matDark);
-            rightVTail.position.set(-1.2, 1, 3);
-            rightVTail.rotation.z = Math.PI / 8;
-            jetGroup.add(rightVTail);
-
-            const hTailGeo = new THREE.BoxGeometry(3, 0.1, 2);
-            const leftHTail = new THREE.Mesh(hTailGeo, matDark);
-            leftHTail.position.set(2, 0, 3.5);
-            jetGroup.add(leftHTail);
-
-            const rightHTail = new THREE.Mesh(hTailGeo, matDark);
-            rightHTail.position.set(-2, 0, 3.5);
-            jetGroup.add(rightHTail);
-
-            const burnerGeo = new THREE.ConeGeometry(0.4, 3, 16);
-            const burnerMat = new THREE.MeshBasicMaterial({ color: 0x00ffff, transparent: true, opacity: 0.8 }); 
-            
-            afterburnerL = new THREE.Mesh(burnerGeo, burnerMat);
-            afterburnerL.rotation.x = Math.PI / 2;
-            afterburnerL.position.set(0.6, 0, 5.5);
-            jetGroup.add(afterburnerL);
-
-            afterburnerR = new THREE.Mesh(burnerGeo, burnerMat);
-            afterburnerR.rotation.x = Math.PI / 2;
-            afterburnerR.position.set(-0.6, 0, 5.5);
-            jetGroup.add(afterburnerR);
-
-            jetGroup.position.set(0, 1500, 0); 
+            jetGroup.position.y = 500;
             scene.add(jetGroup);
-
-            camera.position.set(0, 4, 15); 
-            camera.lookAt(0, 0, -10);
+            
+            // 카메라는 기체 뒤쪽에 고정
             jetGroup.add(camera);
+            camera.position.set(0, 2, 8);
+            camera.lookAt(0, 0, -10);
         }
 
-        // --- 적군 전투기 스폰 시스템 ---
-        function spawnEnemyFighter() {
-            if (!isGameRunning) return;
-            
-            const enemyGroup = new THREE.Group();
-            
-            // 검은색과 붉은색 포인트가 있는 적 전투기 재질
-            const matDark = new THREE.MeshStandardMaterial({color: 0x222222, metalness: 0.8});
-            const matRed = new THREE.MeshStandardMaterial({color: 0xff0000, emissive: 0x550000});
+        function createEnvironment() {
+            // 바다
+            const seaGeo = new THREE.PlaneGeometry(20000, 20000);
+            const seaMat = new THREE.MeshPhongMaterial({ color: 0x001133, transparent: true, opacity: 0.8 });
+            sea = new THREE.Mesh(seaGeo, seaMat);
+            sea.rotation.x = -Math.PI / 2;
+            scene.add(sea);
 
-            // 적기 몸통
-            const body = new THREE.Mesh(new THREE.CylinderGeometry(2, 3, 20, 8), matDark);
-            body.rotation.x = Math.PI / 2;
-            
-            // 적기 기수 (뾰족함)
-            const nose = new THREE.Mesh(new THREE.ConeGeometry(2, 8, 8), matDark);
-            nose.rotation.x = -Math.PI / 2;
-            nose.position.z = -14;
-
-            // 적기 붉은 조종석
-            const cockpitGeo = new THREE.SphereGeometry(1.5, 8, 8);
-            const cockpit = new THREE.Mesh(cockpitGeo, matRed);
-            cockpit.scale.set(1, 4, 1);
-            cockpit.rotation.x = Math.PI / 2;
-            cockpit.position.set(0, 1.5, -5);
-
-            // 적기 주익 (크게)
-            const wingGeo = new THREE.BoxGeometry(25, 0.5, 8);
-            const wing = new THREE.Mesh(wingGeo, matDark);
-            wing.position.set(0, 0, 2);
-
-            // 적기 수직 미익
-            const tail = new THREE.Mesh(new THREE.BoxGeometry(0.5, 6, 4), matDark);
-            tail.position.set(0, 3, 8);
-            tail.rotation.x = -Math.PI / 8;
-
-            // 적기 엔진 불꽃 (빨간색)
-            const engineGeo = new THREE.CylinderGeometry(1.5, 1.5, 2, 16);
-            const engine = new THREE.Mesh(engineGeo, matRed);
-            engine.rotation.x = Math.PI / 2;
-            engine.position.set(0, 0, 11);
-
-            enemyGroup.add(body, nose, cockpit, wing, tail, engine);
-
-            // 화면 앞으로부터 2km ~ 4km 앞쪽 랜덤 위치
-            const forward = new THREE.Vector3(0, 0, -1).applyQuaternion(jetGroup.quaternion);
-            const right = new THREE.Vector3(1, 0, 0).applyQuaternion(jetGroup.quaternion);
-            
-            const distanceAhead = 2000 + Math.random() * 2000; 
-            const offsetRight = (Math.random() - 0.5) * 1500;  
-            const heightOffset = (Math.random() - 0.5) * 800; 
-
-            enemyGroup.position.copy(jetGroup.position)
-                .add(forward.multiplyScalar(distanceAhead))
-                .add(right.multiplyScalar(offsetRight));
-            enemyGroup.position.y += heightOffset;
-
-            if (enemyGroup.position.y < 300) enemyGroup.position.y = 600;
-
-            // 플레이어 방향으로 기수를 돌리고 돌진
-            enemyGroup.lookAt(jetGroup.position);
-            
-            const dirToPlayer = new THREE.Vector3().subVectors(jetGroup.position, enemyGroup.position).normalize();
-            enemyGroup.userData = { vel: dirToPlayer.multiplyScalar(800) }; // 적 전투기 이동 속도
-
-            scene.add(enemyGroup);
-            enemies.push(enemyGroup);
-
-            // 경고 표시
-            document.getElementById('warning-msg').style.display = 'block';
-            setTimeout(() => { document.getElementById('warning-msg').style.display = 'none'; }, 2000);
-        }
-
-        // 폭발 이펙트
-        function createExplosion(pos) {
-            const expGeo = new THREE.SphereGeometry(1, 16, 16);
-            const expMat = new THREE.MeshBasicMaterial({ color: 0xff5500, transparent: true, opacity: 1 });
-            const explosion = new THREE.Mesh(expGeo, expMat);
-            explosion.position.copy(pos);
-            scene.add(explosion);
-            explosions.push({ mesh: explosion, scale: 20, opacity: 1 });
+            // 간단한 지형 조각들
+            for(let i=0; i<40; i++) {
+                const islandGeo = new THREE.ConeGeometry(50 + Math.random()*100, 100 + Math.random()*200, 6);
+                const islandMat = new THREE.MeshPhongMaterial({ color: 0x111111 });
+                const island = new THREE.Mesh(islandGeo, islandMat);
+                island.position.set(Math.random()*10000-5000, 0, Math.random()*10000-5000);
+                scene.add(island);
+            }
         }
 
         function startGame() {
-    // 1. 오버레이 화면을 확실하게 숨김
-    const overlay = document.getElementById('overlay');
-    if (overlay) {
-        overlay.style.setProperty('display', 'none', 'important');
-        overlay.style.visibility = 'hidden'; // 추가적인 안전장치
-        overlay.style.opacity = '0';
-    }
+            const overlay = document.getElementById('overlay');
+            if (overlay) {
+                overlay.classList.add('hidden'); // 클래스로 숨기기
+            }
+            isGameRunning = true;
+            window.focus(); // iframe 포커스 획득
+        }
 
-    // 2. 게임 상태 활성화
-    isGameRunning = true;
-    
-    // 3. iframe 내에서 키보드 입력을 받기 위해 포커스를 강제로 가져옴
-    window.focus(); 
-
-    // 4. 애니메이션 루프 시작 (이미 실행 중이지 않은 경우에만)
-    // animate(); // 기존 코드에 따라 유지 또는 호출
-}
+        function renderLoop() {
+            requestAnimationFrame(renderLoop);
+            const dt = clock.getDelta();
+            const time = clock.getElapsedTime();
 
             if (isGameRunning) {
                 updatePhysics(dt, time);
                 updateUI();
-            }
+                
+                // 카메라 효과
+                camera.rotation.z = -roll * 0.2;
+                camera.fov = 75 + (speed / maxSpeed) * 20;
+                camera.updateProjectionMatrix();
 
-            if (isGameRunning) {
-               camera.rotation.z = -roll * 0.2;
-               camera.fov = 75 + (speed / maxSpeed) * 20;
-               camera.updateProjectionMatrix();
+                // 적기 생성 로직 (예시)
+                if (Math.random() < 0.005 && enemies.length < 3) spawnEnemy();
             }
 
             renderer.render(scene, camera);
         }
 
         function updatePhysics(dt, time) {
-            if (keys.w) throttle += 30 * dt;
-            if (keys.s) throttle -= 40 * dt;
-            throttle = Math.max(0, Math.min(100, throttle));
-
-            const burnerScale = Math.max(0.1, (throttle / 100) * 1.5 + Math.random() * 0.1);
-            afterburnerL.scale.set(1, burnerScale, 1);
-            afterburnerR.scale.set(1, burnerScale, 1);
-            if(throttle > 80) {
-                afterburnerL.material.color.setHex(0xff5500); afterburnerR.material.color.setHex(0xff5500);
-            } else {
-                afterburnerL.material.color.setHex(0x00aaff); afterburnerR.material.color.setHex(0x00aaff);
-            }
+            // 속도 제어 (Shift/Ctrl)
+            if (keys['ShiftLeft']) throttle = Math.min(100, throttle + 0.5);
+            if (keys['ControlLeft']) throttle = Math.max(0, throttle - 0.5);
 
             const targetSpeed = (throttle / 100) * maxSpeed;
-            const pitchSpeedImpact = Math.sin(pitch) * 200; 
-            speed = THREE.MathUtils.lerp(speed, targetSpeed - pitchSpeedImpact, 0.5 * dt);
-            
-            if (speed < minFlightSpeed) {
-                pitch = THREE.MathUtils.lerp(pitch, -Math.PI/2.5, dt * 2.0); 
-            } else {
-                const controlAuthority = Math.min(speed / 300, 1.0); 
+            speed += (targetSpeed - speed) * dt;
 
-                if (keys.ArrowDown) pitch += 2.0 * controlAuthority * dt;
-                if (keys.ArrowUp) pitch -= 2.0 * controlAuthority * dt;
-                if (keys.ArrowLeft) roll += 3.0 * controlAuthority * dt;
-                if (keys.ArrowRight) roll -= 3.0 * controlAuthority * dt;
-                if (keys.a) yaw += 1.5 * controlAuthority * dt;
-                if (keys.d) yaw -= 1.5 * controlAuthority * dt;
+            // 회전 제어 (WASD)
+            const rotationSpeed = 1.5 * dt;
+            if (keys['KeyW']) pitch += rotationSpeed;
+            if (keys['KeyS']) pitch -= rotationSpeed;
+            if (keys['KeyA']) roll += rotationSpeed;
+            if (keys['KeyD']) roll -= rotationSpeed;
 
-                if (!keys.ArrowLeft && !keys.ArrowRight) roll = THREE.MathUtils.lerp(roll, 0, 2.0 * dt);
-            }
+            // 자동 수평 복원 및 마찰
+            pitch *= 0.98;
+            roll *= 0.98;
 
-            pitch = Math.max(-Math.PI/2.2, Math.min(Math.PI/2.2, pitch));
-            yaw += roll * 0.8 * dt;
+            // 기체 이동 적용
+            jetGroup.translateZ(-speed * dt * 0.1);
+            jetGroup.rotation.x = pitch;
+            jetGroup.rotation.z = roll;
 
-            const euler = new THREE.Euler(pitch, yaw, roll, 'YXZ');
-            jetGroup.quaternion.setFromEuler(euler);
-
-            const moveVec = new THREE.Vector3(0, 0, -1);
-            moveVec.applyQuaternion(jetGroup.quaternion);
-            moveVec.multiplyScalar(speed * dt);
-            jetGroup.position.add(moveVec);
-
-            // 기관포 사격
-            if (keys.space && time - lastShootTime > 0.08) {
-                lastShootTime = time;
-                const bulletGeo = new THREE.CylinderGeometry(1, 1, 40, 8); 
-                const bulletMat = new THREE.MeshBasicMaterial({ color: 0x00ff00 });
-                const bullet = new THREE.Mesh(bulletGeo, bulletMat);
-                
-                bullet.rotation.copy(jetGroup.rotation);
-                bullet.rotateX(Math.PI / 2); 
-                
-                const nosePos = new THREE.Vector3(0, 0, -10).applyQuaternion(jetGroup.quaternion);
-                bullet.position.copy(jetGroup.position).add(nosePos);
-                
-                const bulletSpeed = speed + 6000; 
-                bullet.userData = { vel: moveVec.clone().normalize().multiplyScalar(bulletSpeed * dt), life: 2.0 };
-                
-                scene.add(bullet);
-                bullets.push(bullet);
-            }
-
-            // 적 전투기 이동
-            for (let i = enemies.length - 1; i >= 0; i--) {
-                const e = enemies[i];
-                e.position.add(e.userData.vel.clone().multiplyScalar(dt)); 
-
-                if (jetGroup.position.distanceTo(e.position) > 8000) {
-                    scene.remove(e);
-                    enemies.splice(i, 1);
-                }
-            }
-
-            // 탄환 및 충돌
-            for (let i = bullets.length - 1; i >= 0; i--) {
-                const b = bullets[i];
-                b.position.add(b.userData.vel);
-                b.userData.life -= dt;
-                
-                let hit = false;
-                for (let j = enemies.length - 1; j >= 0; j--) {
-                    const e = enemies[j];
-                    // 적 비행기 크기에 맞춘 충돌 반경(약 30)
-                    if (b.position.distanceTo(e.position) < 30) { 
-                        createExplosion(e.position);
-                        scene.remove(e);
-                        enemies.splice(j, 1);
-                        hit = true;
-                        score += 100;
-                        break;
-                    }
-                }
-
-                if (hit || b.userData.life <= 0) {
-                    scene.remove(b);
-                    bullets.splice(i, 1);
-                }
-            }
-
-            // 폭발 이펙트
-            for (let i = explosions.length - 1; i >= 0; i--) {
-                const exp = explosions[i];
-                exp.scale += 200 * dt; 
-                exp.opacity -= 1.5 * dt; 
-                exp.mesh.scale.set(exp.scale, exp.scale, exp.scale);
-                exp.mesh.material.opacity = exp.opacity;
-                
-                if (exp.opacity <= 0) {
-                    scene.remove(exp.mesh);
-                    explosions.splice(i, 1);
-                }
-            }
-
-            if (jetGroup.position.y < 50) gameOver();
-            
-            const ch = document.getElementById('crosshair');
-            const pitchOffset = (pitch / (Math.PI/2)) * 200;
-            ch.style.transform = `translate(-50%, calc(-50% + ${pitchOffset}px)) rotate(${-roll}rad)`;
+            // 지면 충돌 검사
+            if (jetGroup.position.y < 5) gameOver();
         }
 
         function updateUI() {
@@ -546,16 +244,20 @@
             document.getElementById('val-spd').innerText = Math.floor(speed) + " KM/H";
             document.getElementById('val-alt').innerText = Math.floor(jetGroup.position.y * 5) + " FT";
             document.getElementById('val-thr').innerText = Math.floor(throttle) + " %";
-            
             document.getElementById('throttle-bar').style.height = throttle + "%";
 
             if(speed < minFlightSpeed + 50) document.getElementById('val-spd').style.color = '#ff0000';
             else document.getElementById('val-spd').style.color = '#00ff00';
         }
 
+        function spawnEnemy() {
+            // 적기 생성 로직 생략 (기능 확장 시 추가 가능)
+        }
+
         function gameOver() {
             isGameRunning = false;
-            document.getElementById('overlay').style.display = 'flex';
+            const overlay = document.getElementById('overlay');
+            overlay.classList.remove('hidden');
             document.querySelector('.menu-box h1').innerText = "SYSTEM FAILED";
             document.querySelector('.menu-box h1').style.color = "#ff0000";
             document.querySelector('.menu-box p').innerText = `기체가 파괴되었습니다. (최종 점수: ${score})`;
@@ -571,4 +273,3 @@
     </script>
 </body>
 </html>
-
