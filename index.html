@@ -7,13 +7,24 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
     <style>
-        body { font-family: 'Inter', sans-serif; background-color: #0f172a; color: #f8fafc; overflow-x: hidden; }
-        .glass { background: rgba(30, 41, 59, 0.7); backdrop-filter: blur(12px); border: 1px solid rgba(255, 255, 255, 0.1); }
+        :root {
+            --bg-main: #0f172a;
+            --glass-bg: rgba(30, 41, 59, 0.7);
+        }
+        body { 
+            font-family: 'Inter', sans-serif; 
+            background-color: var(--bg-main); 
+            color: #f8fafc; 
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            overflow-y: auto; /* 전체 페이지 스크롤 허용 */
+            margin: 0;
+        }
+        .glass { background: var(--glass-bg); backdrop-filter: blur(12px); border: 1px solid rgba(255, 255, 255, 0.1); }
         .braille-dot { width: 55px; height: 55px; border-radius: 50%; border: 3px solid #334155; transition: all 0.2s; cursor: pointer; position: relative; }
         .braille-dot.active { background-color: #3b82f6; border-color: #60a5fa; box-shadow: 0 0 15px rgba(59, 130, 246, 0.5); }
         .key-hint { position: absolute; font-size: 10px; color: #94a3b8; pointer-events: none; bottom: -20px; width: 100%; text-align: center; font-weight: bold; }
-        .custom-scroll::-webkit-scrollbar { width: 4px; }
-        .custom-scroll::-webkit-scrollbar-thumb { background: #334155; border-radius: 10px; }
         
         .mode-toggle { display: flex; background: #1e293b; padding: 4px; border-radius: 12px; gap: 4px; }
         .mode-btn { padding: 6px 12px; border-radius: 8px; font-size: 12px; font-weight: 600; transition: all 0.2s; color: #94a3b8; }
@@ -23,26 +34,29 @@
         @keyframes shake { 0%, 100% { transform: translateX(0); } 25% { transform: translateX(-10px); } 75% { transform: translateX(10px); } }
         .quiz-correct { animation: correct 0.5s ease-out; }
         .quiz-wrong { animation: shake 0.3s ease-in-out; }
+
+        main { flex: 1; }
     </style>
 </head>
-<body class="min-h-screen p-4 md:p-8">
+<body class="p-4 md:p-8">
 
-    <div class="max-w-6xl mx-auto">
-        <header class="flex flex-col md:flex-row justify-between items-center mb-8 gap-6">
+    <div class="max-w-6xl mx-auto w-full flex flex-col">
+        <header class="flex flex-col md:flex-row justify-between items-center mb-8 gap-4 shrink-0">
             <div>
-                <h1 class="text-4xl font-black text-blue-500 tracking-tighter">Braille Master</h1>
-                <p class="text-slate-400 text-sm">점자 번역기 & 무한 생성 학습 퀴즈</p>
+                <h1 class="text-3xl font-black text-blue-500 tracking-tighter">Braille Master</h1>
+                <p class="text-slate-400 text-xs">점자 번역기 & 무한 생성 학습 퀴즈</p>
             </div>
-            <div class="flex bg-slate-800 p-1.5 rounded-2xl shadow-inner">
-                <button onclick="switchAppMode('translator')" id="nav-translator" class="px-8 py-2.5 rounded-xl text-sm font-bold transition-all bg-blue-600 text-white shadow-lg">번역기</button>
-                <button onclick="switchAppMode('quiz')" id="nav-quiz" class="px-8 py-2.5 rounded-xl text-sm font-bold transition-all text-slate-400 hover:text-white">퀴즈 게임</button>
+            <div class="flex bg-slate-800 p-1 rounded-xl shadow-inner">
+                <button onclick="switchAppMode('translator')" id="nav-translator" class="px-6 py-2 rounded-lg text-sm font-bold transition-all bg-blue-600 text-white shadow-lg">번역기</button>
+                <button onclick="switchAppMode('quiz')" id="nav-quiz" class="px-6 py-2 rounded-lg text-sm font-bold transition-all text-slate-400 hover:text-white">퀴즈 게임</button>
             </div>
         </header>
 
-        <main id="app-content">
+        <main class="w-full">
             <!-- Translator Mode -->
             <div id="translator-view" class="grid grid-cols-1 lg:grid-cols-12 gap-8">
-                <div class="lg:col-span-8 space-y-6">
+                <div class="lg:col-span-8 flex flex-col gap-8">
+                    <!-- Result Area -->
                     <div class="glass rounded-3xl p-6 shadow-xl space-y-4">
                         <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
                             <div class="flex flex-col">
@@ -53,17 +67,21 @@
                                     <button onclick="setLangMode('num')" class="mode-btn" id="m-num">숫자/기호</button>
                                 </div>
                             </div>
-                            <div class="flex gap-3">
-                                <button onclick="copyText()" class="px-3 py-1 text-xs bg-slate-800 hover:bg-slate-700 text-blue-400 rounded-lg border border-slate-700 transition">복사</button>
-                                <button onclick="clearAll()" class="px-3 py-1 text-xs bg-slate-800 hover:bg-slate-700 text-red-400 rounded-lg border border-slate-700 transition">지우기</button>
+                            <div class="flex gap-2">
+                                <button onclick="copyText()" class="px-4 py-2 text-xs bg-slate-800 hover:bg-slate-700 text-blue-400 rounded-lg border border-slate-700 transition">복사</button>
+                                <button onclick="clearAll()" class="px-4 py-2 text-xs bg-slate-800 hover:bg-slate-700 text-red-400 rounded-lg border border-slate-700 transition">지우기</button>
                             </div>
                         </div>
-                        <div id="result-display" class="w-full min-h-[140px] bg-slate-950/50 rounded-2xl p-6 text-4xl font-bold break-all leading-relaxed border border-slate-800/50 shadow-inner"></div>
+                        <!-- Result Display: Grows with content -->
+                        <div id="result-container" class="w-full min-h-[120px] bg-slate-950/50 rounded-2xl p-6 border border-slate-800/50 shadow-inner">
+                            <div id="result-display" class="text-3xl font-bold break-all leading-relaxed min-h-[1.5em]"></div>
+                        </div>
                     </div>
 
-                    <div class="glass rounded-3xl p-10 flex flex-col items-center gap-10">
+                    <!-- Input Grid -->
+                    <div class="glass rounded-3xl p-10 flex flex-col items-center justify-center gap-8">
                         <div class="flex flex-col items-center">
-                            <div class="grid grid-cols-2 gap-x-16 gap-y-8 relative">
+                            <div class="grid grid-cols-2 gap-x-14 gap-y-8 relative">
                                 <div id="dot-1" onclick="toggleDot(1)" class="braille-dot"><span class="key-hint">1</span></div>
                                 <div id="dot-4" onclick="toggleDot(4)" class="braille-dot"><span class="key-hint">4</span></div>
                                 <div id="dot-2" onclick="toggleDot(2)" class="braille-dot"><span class="key-hint">2</span></div>
@@ -71,7 +89,7 @@
                                 <div id="dot-3" onclick="toggleDot(3)" class="braille-dot"><span class="key-hint">3</span></div>
                                 <div id="dot-6" onclick="toggleDot(6)" class="braille-dot"><span class="key-hint">6</span></div>
                             </div>
-                            <div id="pattern-preview" class="mt-12 h-8 text-blue-400 font-bold text-xl tracking-widest opacity-50"></div>
+                            <div id="pattern-preview" class="mt-10 h-6 text-blue-400 font-bold text-xl tracking-widest opacity-60"></div>
                         </div>
                         <div class="flex gap-4 w-full max-w-md">
                             <button onclick="addCharacter()" class="flex-[2] py-5 bg-blue-600 hover:bg-blue-500 rounded-2xl font-black text-xl transition-all active:scale-95 shadow-lg shadow-blue-900/40">글자 추가</button>
@@ -80,36 +98,39 @@
                     </div>
                 </div>
 
-                <aside class="lg:col-span-4 h-full">
-                    <div class="glass rounded-3xl p-6 h-full flex flex-col shadow-2xl">
-                        <h3 class="font-bold text-white mb-6 text-sm flex items-center italic">REFERENCE GUIDE</h3>
-                        <div id="guide-content" class="grid grid-cols-2 gap-3 overflow-y-auto max-h-[600px] custom-scroll pr-2"></div>
+                <!-- Reference Side -->
+                <aside class="lg:col-span-4">
+                    <div class="glass rounded-3xl p-6 shadow-2xl">
+                        <h3 class="font-bold text-slate-400 mb-6 text-[11px] uppercase tracking-widest flex items-center">
+                            <span class="w-2.5 h-2.5 bg-blue-500 rounded-full mr-2"></span> Reference Guide
+                        </h3>
+                        <!-- No internal scroll, grows with page -->
+                        <div id="guide-content" class="grid grid-cols-2 gap-3"></div>
                     </div>
                 </aside>
             </div>
 
             <!-- Quiz Mode -->
-            <div id="quiz-view" class="hidden max-w-2xl mx-auto space-y-8 animate-in fade-in duration-500">
+            <div id="quiz-view" class="hidden max-w-2xl mx-auto py-10 animate-in fade-in duration-500">
                 <div class="glass rounded-3xl p-10 text-center space-y-8 shadow-2xl relative overflow-hidden" id="quiz-card">
-                    <div class="flex justify-between items-center text-xs font-bold text-slate-500 uppercase tracking-widest">
+                    <div class="flex justify-between items-center text-[10px] font-bold text-slate-500 uppercase tracking-widest">
                         <span class="bg-slate-800/80 px-4 py-2 rounded-full border border-slate-700">SCORE: <span id="quiz-score" class="text-blue-400">0</span></span>
                         <div class="flex gap-2">
-                            <button onclick="setQuizDifficulty('easy')" id="diff-easy" class="px-3 py-1 rounded-full border border-blue-500/50 text-blue-400 bg-blue-500/10">쉬움</button>
-                            <button onclick="setQuizDifficulty('hard')" id="diff-hard" class="px-3 py-1 rounded-full border border-slate-700 text-slate-500">어려움</button>
+                            <button onclick="setQuizDifficulty('easy')" id="diff-easy" class="px-4 py-2 rounded-full border border-blue-500/50 text-blue-400 bg-blue-500/10 transition-colors">쉬움</button>
+                            <button onclick="setQuizDifficulty('hard')" id="diff-hard" class="px-4 py-2 rounded-full border border-slate-700 text-slate-500 transition-colors">어려움</button>
                         </div>
                     </div>
 
-                    <div class="py-2">
-                        <p id="quiz-instruction" class="text-slate-400 text-sm mb-4 font-medium uppercase tracking-widest">다음 글자의 점자를 만드세요</p>
-                        <div class="flex justify-center items-end gap-2">
-                            <h2 id="quiz-question" class="text-9xl font-black text-white tracking-tighter transition-all">A</h2>
-                            <span id="quiz-target-index" class="text-blue-500 font-bold mb-2 hidden">1/3</span>
+                    <div class="py-4">
+                        <p id="quiz-instruction" class="text-slate-500 text-xs mb-4 font-bold uppercase tracking-widest">글자를 점자로 만드세요</p>
+                        <div class="flex justify-center items-end gap-3">
+                            <h2 id="quiz-question" class="text-9xl font-black text-white tracking-tighter transition-all leading-none">A</h2>
+                            <span id="quiz-target-index" class="text-blue-500 font-bold mb-2 hidden text-xl">1/3</span>
                         </div>
-                        <div id="quiz-word-preview" class="mt-4 flex justify-center gap-1 h-2"></div>
                     </div>
                     
-                    <div class="flex justify-center py-4">
-                        <div class="grid grid-cols-2 gap-x-12 gap-y-6">
+                    <div class="flex justify-center py-6">
+                        <div class="grid grid-cols-2 gap-x-12 gap-y-8">
                             <div id="q-dot-1" onclick="toggleDot(1)" class="braille-dot"><span class="key-hint">1</span></div>
                             <div id="q-dot-4" onclick="toggleDot(4)" class="braille-dot"><span class="key-hint">4</span></div>
                             <div id="q-dot-2" onclick="toggleDot(2)" class="braille-dot"><span class="key-hint">2</span></div>
@@ -119,14 +140,17 @@
                         </div>
                     </div>
 
-                    <div class="space-y-4">
+                    <div class="space-y-4 max-w-sm mx-auto">
                         <button onclick="submitQuizAnswer()" class="w-full py-5 bg-blue-600 hover:bg-blue-500 rounded-2xl font-black text-2xl transition-all shadow-lg shadow-blue-900/40 active:scale-[0.98]">입력 확인</button>
                         <div id="quiz-feedback" class="h-6 text-sm font-bold transition-all"></div>
                     </div>
                 </div>
-                <p class="text-center text-slate-500 text-xs">힌트: 우측 참조표 가이드를 보고 연습할 수 있습니다.</p>
             </div>
         </main>
+        
+        <footer class="mt-12 py-8 text-center text-slate-600 text-xs border-t border-slate-800/50">
+            &copy; 2024 Braille Master Learning Tool. 키보드 1~6번 키를 사용하여 입력할 수 있습니다.
+        </footer>
     </div>
 
     <script>
@@ -140,19 +164,16 @@
         let appMode = 'translator';
         let currentLangMode = 'en';
         let quizScore = 0;
-        let quizDifficulty = 'easy'; // easy: 1 char, hard: word
+        let quizDifficulty = 'easy'; 
         let currentQuiz = { question: "", answers: [], currentIndex: 0 };
 
-        // --- Core ---
         function toggleDot(num) {
             if (activeDots.has(num)) {
                 activeDots.delete(num);
-                document.getElementById(`dot-${num}`)?.classList.remove('active');
-                document.getElementById(`q-dot-${num}`)?.classList.remove('active');
+                document.querySelectorAll(`#dot-${num}, #q-dot-${num}`).forEach(el => el?.classList.remove('active'));
             } else {
                 activeDots.add(num);
-                document.getElementById(`dot-${num}`)?.classList.add('active');
-                document.getElementById(`q-dot-${num}`)?.classList.add('active');
+                document.querySelectorAll(`#dot-${num}, #q-dot-${num}`).forEach(el => el?.classList.add('active'));
             }
             updatePreview();
         }
@@ -168,7 +189,7 @@
             if (!pattern) { previewEl.innerText = ""; return; }
             const map = BRAILLE_MAP[currentLangMode];
             let found = Object.keys(map).find(k => map[k] === pattern);
-            previewEl.innerText = found ? `입력 중: ${found}` : "패턴 분석 중...";
+            previewEl.innerText = found ? `입력: ${found}` : "패턴 분석 중...";
         }
 
         function setLangMode(mode) {
@@ -183,21 +204,33 @@
             if (!pattern) return;
             const map = BRAILLE_MAP[currentLangMode];
             let char = Object.keys(map).find(k => map[k] === pattern) || "?";
-            document.getElementById('result-display').innerText += char;
+            const display = document.getElementById('result-display');
+            display.innerText += char;
             resetDots();
         }
 
-        function addSpace() { document.getElementById('result-display').innerText += " "; }
+        function addSpace() { 
+            const display = document.getElementById('result-display');
+            display.innerText += " "; 
+        }
+        
         function resetDots() {
             activeDots.clear();
             document.querySelectorAll('.braille-dot').forEach(d => d.classList.remove('active'));
             updatePreview();
         }
+        
         function clearAll() { document.getElementById('result-display').innerText = ""; resetDots(); }
+        
         function copyText() {
             const text = document.getElementById('result-display').innerText;
             if(!text) return;
-            navigator.clipboard.writeText(text).then(() => alert('클립보드에 복사되었습니다!'));
+            const tempInput = document.createElement('textarea');
+            tempInput.value = text;
+            document.body.appendChild(tempInput);
+            tempInput.select();
+            document.execCommand('copy');
+            document.body.removeChild(tempInput);
         }
 
         function renderGuide() {
@@ -206,12 +239,12 @@
             const map = BRAILLE_MAP[currentLangMode];
             for (let char in map) {
                 const item = document.createElement('div');
-                item.className = "bg-slate-800/40 p-3.5 rounded-2xl flex items-center justify-between border border-slate-700/50 hover:border-blue-500/50 transition cursor-pointer group active:scale-95 shadow-sm";
+                item.className = "bg-slate-800/40 p-4 rounded-xl flex items-center justify-between border border-slate-700/30 hover:border-blue-500/50 transition cursor-pointer group active:scale-95 shadow-sm";
                 item.onclick = () => {
                     resetDots();
                     map[char].split('').forEach(d => toggleDot(parseInt(d)));
                 };
-                item.innerHTML = `<span class="font-bold text-white text-lg">${char}</span><span class="text-[11px] text-blue-400 mono font-bold bg-slate-900/80 px-2 py-1 rounded-md group-hover:text-blue-300">${map[char]}</span>`;
+                item.innerHTML = `<span class="font-bold text-white text-lg">${char}</span><span class="text-xs text-blue-400 mono font-bold bg-slate-900/80 px-2 py-1 rounded group-hover:text-blue-300">${map[char]}</span>`;
                 container.appendChild(item);
             }
         }
@@ -220,17 +253,16 @@
             appMode = mode;
             document.getElementById('translator-view').classList.toggle('hidden', mode !== 'translator');
             document.getElementById('quiz-view').classList.toggle('hidden', mode !== 'quiz');
-            document.getElementById('nav-translator').className = mode === 'translator' ? "px-8 py-2.5 rounded-xl text-sm font-bold transition-all bg-blue-600 text-white shadow-lg" : "px-8 py-2.5 rounded-xl text-sm font-bold transition-all text-slate-400 hover:text-white";
-            document.getElementById('nav-quiz').className = mode === 'quiz' ? "px-8 py-2.5 rounded-xl text-sm font-bold transition-all bg-blue-600 text-white shadow-lg" : "px-8 py-2.5 rounded-xl text-sm font-bold transition-all text-slate-400 hover:text-white";
+            document.getElementById('nav-translator').className = mode === 'translator' ? "px-6 py-2 rounded-lg text-sm font-bold transition-all bg-blue-600 text-white shadow-lg" : "px-6 py-2 rounded-lg text-sm font-bold transition-all text-slate-400 hover:text-white";
+            document.getElementById('nav-quiz').className = mode === 'quiz' ? "px-6 py-2 rounded-lg text-sm font-bold transition-all bg-blue-600 text-white shadow-lg" : "px-6 py-2 rounded-lg text-sm font-bold transition-all text-slate-400 hover:text-white";
             if (mode === 'quiz') startNewQuiz(); else renderGuide();
             resetDots();
         }
 
-        // --- Infinite Quiz Engine ---
         function setQuizDifficulty(diff) {
             quizDifficulty = diff;
-            document.getElementById('diff-easy').className = diff === 'easy' ? "px-3 py-1 rounded-full border border-blue-500/50 text-blue-400 bg-blue-500/10" : "px-3 py-1 rounded-full border border-slate-700 text-slate-500";
-            document.getElementById('diff-hard').className = diff === 'hard' ? "px-3 py-1 rounded-full border border-blue-500/50 text-blue-400 bg-blue-500/10" : "px-3 py-1 rounded-full border border-slate-700 text-slate-500";
+            document.getElementById('diff-easy').className = diff === 'easy' ? "px-4 py-2 rounded-full border border-blue-500/50 text-blue-400 bg-blue-500/10" : "px-4 py-2 rounded-full border border-slate-700 text-slate-500";
+            document.getElementById('diff-hard').className = diff === 'hard' ? "px-4 py-2 rounded-full border border-blue-500/50 text-blue-400 bg-blue-500/10" : "px-4 py-2 rounded-full border border-slate-700 text-slate-500";
             startNewQuiz();
         }
 
@@ -247,8 +279,7 @@
                 currentQuiz.answers.push(BRAILLE_MAP[lang][char]);
                 document.getElementById('quiz-target-index').classList.add('hidden');
             } else {
-                // Hard: Random word (2-3 chars)
-                const lang = allLangs[Math.floor(Math.random() * 2)]; // en or ko
+                const lang = allLangs[Math.floor(Math.random() * 2)]; 
                 const keys = Object.keys(BRAILLE_MAP[lang]);
                 let word = "";
                 for(let i=0; i<3; i++) {
@@ -264,7 +295,7 @@
             document.getElementById('quiz-question').innerText = currentQuiz.question[0];
             document.getElementById('quiz-feedback').innerText = "";
             document.getElementById('quiz-feedback').className = "h-6 text-sm font-bold text-slate-500";
-            document.getElementById('quiz-instruction').innerText = quizDifficulty === 'easy' ? "다음 글자의 점자를 만드세요" : `단어 학습: "${currentQuiz.question}"`;
+            document.getElementById('quiz-instruction').innerText = quizDifficulty === 'easy' ? "글자를 점자로 만드세요" : `단어 학습: "${currentQuiz.question}"`;
             resetDots();
         }
 
@@ -289,7 +320,7 @@
                 } else {
                     quizScore += (quizDifficulty === 'easy' ? 10 : 50);
                     document.getElementById('quiz-score').innerText = quizScore;
-                    feedback.innerText = "참 잘했습니다! 정답입니다.";
+                    feedback.innerText = "정답입니다!";
                     feedback.className = "h-6 text-sm font-bold text-green-400";
                     card.classList.add('quiz-correct');
                     setTimeout(() => {
@@ -298,7 +329,7 @@
                     }, 600);
                 }
             } else {
-                feedback.innerText = "패턴이 틀렸습니다. 다시 시도해보세요!";
+                feedback.innerText = "다시 시도해보세요!";
                 feedback.className = "h-6 text-sm font-bold text-red-400";
                 card.classList.add('quiz-wrong');
                 setTimeout(() => card.classList.remove('quiz-wrong'), 300);
